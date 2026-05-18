@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rushabadri">
+<title>Rushabadri Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg:#f7f7f5;--surface:#fff;--surface2:#f2f1ed;--surface3:#e8e7e2;
+  --border:#e0dfd8;--border2:#cccbc2;
+  --text:#1c1c1a;--text2:#5a5a54;--text3:#9a9a90;
+  --green:#1a7a52;--green-bg:#eaf5ee;
+  --red:#c0392b;--red-bg:#fdf0ee;
+  --amber:#9a6200;--amber-bg:#fdf5e6;
+  --blue:#2563eb;--blue-bg:#eff4ff;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --accent:#2563eb;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.04);
+  --modal-overlay:rgba(0,0,0,.3);
+}
+[data-theme="dark"]{
+  --bg:#0f0f1a;--surface:#1a1a2e;--surface2:#1e1e35;--surface3:#252540;
+  --border:#2a2a4a;--border2:#353560;
+  --text:#f0f0ff;--text2:#a0a0c0;--text3:#6060a0;
+  --green:#00d4a0;--green-bg:#003d2e;
+  --red:#ff5a5a;--red-bg:#3d0000;
+  --amber:#ffb347;--amber-bg:#3d2800;
+  --blue:#6b8cff;--blue-bg:#1a2050;
+  --purple:#a78bfa;--purple-bg:#2e1065;
+  --accent:#6b8cff;
+  --shadow:0 1px 3px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.2);
+  --shadow-md:0 4px 16px rgba(0,0,0,.4),0 1px 4px rgba(0,0,0,.2);
+  --modal-overlay:rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;transition:background .2s,color .2s}
+.app{max-width:720px;margin:0 auto;padding:0 0 60px}
+
+/* Header */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.brand h1{font-size:19px;font-weight:700;letter-spacing:-.4px}
+.brand p{font-size:11px;color:var(--text3);margin-top:1px}
+.header-actions{display:flex;align-items:center;gap:6px}
+.sync{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;background:var(--green-bg);color:var(--green)}
+.sync.syncing{background:var(--amber-bg);color:var(--amber)}
+.sync.error{background:var(--red-bg);color:var(--red)}
+.icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 9px;cursor:pointer;font-size:15px;line-height:1;transition:all .15s;color:var(--text2)}
+.icon-btn:hover{background:var(--surface3)}
+
+/* Alert banner */
+.alert-banner{margin:12px 16px 0;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;display:none}
+.alert-banner.late{background:var(--red-bg);color:var(--red);border:1px solid color-mix(in srgb,var(--red) 20%,transparent)}
+.alert-banner.due{background:var(--amber-bg);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 20%,transparent)}
+
+/* Metrics */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mc{background:var(--surface2);border-radius:8px;padding:10px 12px}
+.mc-label{font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.mc-val{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.mc-val.g{color:var(--green)}.mc-val.r{color:var(--red)}.mc-val.a{color:var(--amber)}.mc-val.b{color:var(--blue)}
+
+/* Tabs */
+.tabs-wrap{background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:flex;padding:0 16px}
+.tab{padding:11px 16px;font-size:13px;font-weight:500;border:none;border-bottom:2px solid transparent;cursor:pointer;background:transparent;color:var(--text3);white-space:nowrap;transition:all .2s}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Content */
+.content{padding:14px 16px 0}
+
+/* Unit grid */
+.unit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ucard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.ucard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.ucard.paid::before{background:var(--green)}
+.ucard.late::before{background:var(--red)}
+.ucard.pending::before{background:var(--amber)}
+.ucard.partial::before{background:var(--amber)}
+.ucard.vacant::before{background:var(--border2)}
+.ucard.vacating::before{background:var(--purple)}
+.ucard:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.ucard.sel{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent)}
+.ucard.vacant{opacity:.55}
+.unum{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em}
+.utenant{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:3px}
+.urent{font-size:12px;color:var(--text3);margin-bottom:7px}
+.ubadge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;display:inline-block}
+.b-paid{background:var(--green-bg);color:var(--green)}
+.b-late{background:var(--red-bg);color:var(--red)}
+.b-pending{background:var(--amber-bg);color:var(--amber)}
+.b-partial{background:var(--amber-bg);color:var(--amber)}
+.b-vacant{background:var(--surface2);color:var(--text3)}
+.b-vacating{background:var(--purple-bg);color:var(--purple)}
+.arrears-pill{font-size:10px;font-weight:600;background:var(--red-bg);color:var(--red);border-radius:20px;padding:2px 7px;margin-top:5px;display:inline-block}
+
+/* Panel */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-top:14px;overflow:hidden;box-shadow:var(--shadow-md);display:none}
+.panel.vis{display:block}
+.panel-header{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2)}
+.panel-header h2{font-size:15px;font-weight:600}
+.closebtn{background:var(--surface3);border:1px solid var(--border);cursor:pointer;font-size:15px;color:var(--text2);padding:5px 9px;border-radius:7px;transition:all .15s}
+.closebtn:hover{background:var(--red-bg);color:var(--red)}
+.ptabs{display:flex;border-bottom:1px solid var(--border)}
+.ptab{flex:1;padding:10px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text3);text-align:center;transition:all .2s;border-bottom:2px solid transparent}
+.ptab:hover{color:var(--text2)}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface)}
+.ptab-content{display:none;padding:16px}
+.ptab-content.vis{display:block}
+
+/* Fields */
+.fields{display:grid;grid-template-columns:1fr;gap:11px;margin-bottom:14px}
+@media(min-width:480px){.fields{grid-template-columns:1fr 1fr}}
+.field label{display:block;font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif;transition:border-color .15s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.field textarea{resize:vertical;min-height:65px}
+.field select option{background:var(--surface)}
+
+/* Bill box */
+.bill-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:13px;margin-bottom:14px}
+.bill-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+.bill-row:last-child{border:none;font-weight:700;padding-top:9px;font-size:14px;color:var(--text)}
+.bill-row.arrears{color:var(--red)}
+.bill-row.grand{color:var(--green)}
+.bill-row.pending-row{color:var(--amber)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:10px 16px;font-size:13px;font-weight:500;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif;transition:all .15s}
+.btn:hover{background:var(--surface3);border-color:var(--border2)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{opacity:.9}
+.btn.success{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.success:hover{opacity:.9}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+
+/* Payment log */
+.pay-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:8px}
+.pay-item.paid{border-left:3px solid var(--green)}
+.pay-item.partial{border-left:3px solid var(--amber)}
+.pay-item.unpaid{border-left:3px solid var(--red)}
+.pay-item.pending{border-left:3px solid var(--amber)}
+.pay-item.bill{border-left:3px solid var(--blue);background:var(--blue-bg)}
+.pay-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.pay-month{font-size:13px;font-weight:600}
+.pay-amt{font-size:13px;font-weight:700}
+.pay-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.pay-ref{font-size:11px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:150px}
+.delbtn{background:var(--red-bg);border:1px solid color-mix(in srgb,var(--red) 20%,transparent);cursor:pointer;color:var(--red);font-size:11px;padding:3px 7px;border-radius:6px;font-family:'Inter',sans-serif;font-weight:500}
+.method-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px}
+.m-upi{background:var(--blue-bg);color:var(--blue)}
+.m-bank{background:var(--green-bg);color:var(--green)}
+.m-cash{background:var(--amber-bg);color:var(--amber)}
+.type-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--blue-bg);color:var(--blue)}
+
+/* Arrears tab */
+.arr-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.arr-item.pending-item{border-left-color:var(--amber)}
+.arr-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.arr-detail{font-size:12px;color:var(--text3);margin-bottom:9px;line-height:1.6}
+.arr-footer{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px}
+.arr-badge{font-size:11px;font-weight:600;background:var(--red-bg);color:var(--red);border-radius:20px;padding:3px 9px}
+.arr-badge.pending{background:var(--amber-bg);color:var(--amber)}
+.arr-total{font-size:17px;font-weight:700;color:var(--red)}
+.arr-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.arr-phone{color:var(--blue);text-decoration:none;font-weight:500}
+
+/* Water tab */
+.water-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.water-name{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.water-cost-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.water-cost-row label{font-size:12px;color:var(--text3);font-weight:500;white-space:nowrap}
+.water-cost-input{width:110px;padding:9px 11px;font-size:14px;font-weight:600;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif}
+.water-cost-input:focus{outline:none;border-color:var(--accent)}
+.water-save-btn{padding:8px 14px;font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:var(--accent);color:#fff;border-color:var(--accent);font-family:'Inter',sans-serif}
+.wbill{display:flex;align-items:center;justify-content:space-between;background:var(--green-bg);border-radius:8px;padding:9px 13px;margin-top:10px}
+.wbill-amt{font-size:15px;font-weight:700;color:var(--green)}
+.wbill-label{font-size:12px;color:var(--text3)}
+.wbill.pending-water{background:var(--amber-bg)}
+.wbill.pending-water .wbill-amt{color:var(--amber)}
+
+/* Record payment quick action */
+.quick-pay{background:var(--green-bg);border:1px solid color-mix(in srgb,var(--green) 25%,transparent);border-radius:10px;padding:14px;margin-bottom:14px}
+.quick-pay h3{font-size:13px;font-weight:600;color:var(--green);margin-bottom:10px}
+.quick-pay .fields{margin-bottom:10px}
+
+/* Settings modal */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-overlay);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.vis{display:flex}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;border:1px solid var(--border)}
+.modal-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2)}
+.modal-header h2{font-size:15px;font-weight:600}
+.modal-body{padding:18px}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.setting-row{margin-bottom:16px}
+.setting-row label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.setting-row p{font-size:12px;color:var(--text3);margin-bottom:7px}
+.setting-row input{width:100%;padding:10px 12px;font-size:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif}
+.setting-row input:focus{outline:none;border-color:var(--accent)}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.theme-toggle{display:flex;gap:8px}
+.theme-opt{flex:1;padding:9px;text-align:center;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;background:var(--surface2);color:var(--text2);transition:all .15s}
+.theme-opt.active{border-color:var(--accent);background:var(--blue-bg);color:var(--accent)}
+
+.add-pay{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px}
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 9px}
+.empty-state{text-align:center;padding:28px 20px;color:var(--text3);font-size:13px}
+.empty-state div{font-size:26px;margin-bottom:8px}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-row">
+      <div class="brand">
+        <h1 id="propTitle">Rushabadri</h1>
+        <p id="monthLabel"></p>
+      </div>
+      <div class="header-actions">
+        <span class="sync syncing" id="syncStatus">Connecting...</span>
+        <button class="icon-btn" id="refreshBtn" onclick="refreshApp()" title="Refresh">🔄</button>
+        <button class="icon-btn" onclick="testConnection()" title="Test connection">🔌</button>
+        <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
+      </div>
+    </div>
+    <div id="metricsWrap">
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Monthly Rent</div><div class="mc-val b">—</div></div>
+        <div class="mc"><div class="mc-label">Collected</div><div class="mc-val g">—</div></div>
+        <div class="mc"><div class="mc-label">Late / Due</div><div class="mc-val r">—</div></div>
+        <div class="mc"><div class="mc-label">Arrears</div><div class="mc-val a">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="alertBanner" class="alert-banner"></div>
+
+  <div class="tabs-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-right:16px">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('all',this)">All Units</div>
+        <div class="tab" onclick="switchTab('arrears',this)">Arrears & Late</div>
+        <div class="tab" onclick="switchTab('water',this)">Water Billing</div>
+      </div>
+      <button onclick="downloadReport()" style="font-size:12px;font-weight:500;padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface2);color:var(--text2);cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;flex-shrink:0">⬇️ Report</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="tAll"><div style="padding:30px;text-align:center;color:var(--text3);font-size:13px">Loading...</div></div>
+    <div id="tArrears" style="display:none"></div>
+    <div id="tWater" style="display:none"></div>
+
+    <div class="panel" id="panel">
+      <div class="panel-header">
+        <h2 id="pTitle">Unit Details</h2>
+        <button class="closebtn" onclick="closePanel()">✕</button>
+      </div>
+      <div class="ptabs">
+        <div class="ptab active" onclick="sPTab('info',this)">Tenant Info</div>
+        <div class="ptab" onclick="sPTab('billing',this)">Bill</div>
+        <div class="ptab" onclick="sPTab('history',this)">History</div>
+      </div>
+
+      <!-- Info tab -->
+      <div class="ptab-content vis" id="pt-info">
+        <div class="fields" id="infoF"></div>
+        <button class="btn primary" onclick="doSave()">Save Changes</button>
+      </div>
+
+      <!-- Billing tab -->
+      <div class="ptab-content" id="pt-billing">
+        <div class="bill-box" id="billBox"></div>
+        <!-- Quick pay form shown when unit is not paid -->
+        <div class="quick-pay" id="quickPayBox" style="display:none">
+          <h3>Record Payment</h3>
+          <div class="fields">
+            <div class="field"><label id="qAmtLabel">Amount Received (₹)</label><input type="number" id="qAmt" placeholder="0"></div>
+            <div class="field"><label>Method</label>
+              <select id="qMethod">
+                <option value="upi">UPI</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+            <div class="field"><label>UTR / Reference</label><input type="text" id="qRef" placeholder="UTR number"></div>
+          </div>
+          <button class="btn success" onclick="recordPayment()">Mark as Paid</button>
+        </div>
+        <!-- Water charge entry -->
+        <div id="waterEntryBox" style="margin-top:12px">
+          <div class="field">
+            <label>Water Charge This Month (₹)</label>
+            <input type="number" id="fWater" placeholder="Enter water amount" oninput="refreshBill()">
+          </div>
+          <button class="btn" onclick="saveWaterOnly()" style="margin-top:8px">Save Water Charge</button>
+        </div>
+      </div>
+
+      <!-- History tab -->
+      <div class="ptab-content" id="pt-history">
+        <div id="histList"></div>
+        <div class="sec-title">Add Manual Record</div>
+        <div class="add-pay">
+          <div class="fields">
+            <div class="field"><label>Month</label><input type="month" id="nMonth"></div>
+            <div class="field"><label>Status</label>
+              <select id="nStatus">
+                <option value="paid">Paid</option>
+                <option value="partial">Partial</option>
+                <option value="unpaid">Unpaid</option>
+              </select>
+            </div>
+            <div class="field"><label>Amount Paid (₹)</label><input type="number" id="nAmt" placeholder="0"></div>
+            <div class="field"><label>Method</label>
+              <select id="nMethod">
+                <option value="upi">UPI</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+            <div class="field"><label>Reference / UTR</label><input type="text" id="nRef" placeholder="UTR number"></div>
+          </div>
+          <button class="btn primary" onclick="addManualHist()">Add Record</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1c1c1a;color:#fff;padding:11px 20px;border-radius:30px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;z-index:999;transition:transform .3s ease,opacity .3s ease;opacity:0;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)"></div>
+
+<div class="modal-overlay" id="settingsModal" onclick="closeSettingsOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>⚙️ Settings</h2>
+      <button class="closebtn" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-row">
+        <label>Property Name</label>
+        <input type="text" id="sPropName">
+      </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <label>Default Water Rate (₹/month)</label>
+        <p>Starting value for each unit. Override per unit in Water Billing.</p>
+        <input type="number" id="sWaterRate">
+      </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <label>Payment Due Date</label>
+        <p>Tenants who haven't paid by this date are marked Late.</p>
+        <input type="number" id="sDueDate" min="1" max="28">
+      </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <label>Report Email Address</label>
+        <p>Monthly summary report will be sent here on the 1st of each month.</p>
+        <input type="email" id="sEmail" placeholder="you@example.com">
+      </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <label>Theme</label>
+        <div class="theme-toggle">
+          <div class="theme-opt" id="tLight" onclick="setTheme('light')">☀️ Light</div>
+          <div class="theme-opt" id="tDark" onclick="setTheme('dark')">🌙 Dark</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Toast notification — defined first so all functions can use it
+function showToast(msg, type='success'){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=(type==='success'?'✓ ':type==='error'?'✕ ':'')+msg;
+  t.style.background=type==='success'?'#1a7a52':type==='error'?'#c0392b':'#2563eb';
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{
+    t.style.opacity='0';
+    t.style.transform='translateX(-50%) translateY(80px)';
+  },3000);
+}
+
+const SB_URL='https://vuntumaluvhmkkftdjob.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bnR1bWFsdXZobWtrZnRkam9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NDU1MTYsImV4cCI6MjA5NDMyMTUxNn0.xB8qzk_2pmRGdaha3LlUVo5KXgi-oK5P7nc6Hft9vSE';
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const now=new Date();
+const thisMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const todayDay=now.getDate();
+
+let cfg={
+  waterRate:parseFloat(localStorage.getItem('cfg_waterRate'))||150,
+  propName:localStorage.getItem('cfg_propName')||'Rushabadri',
+  theme:localStorage.getItem('cfg_theme')||'light',
+  dueDate:parseInt(localStorage.getItem('cfg_dueDate'))||15,
+  email:localStorage.getItem('cfg_email')||'',
+};
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',cfg.theme);
+  document.getElementById('tLight')?.classList.toggle('active',cfg.theme==='light');
+  document.getElementById('tDark')?.classList.toggle('active',cfg.theme==='dark');
+}
+function setTheme(t){cfg.theme=t;localStorage.setItem('cfg_theme',t);applyTheme();}
+function applyConfig(){
+  document.getElementById('propTitle').textContent=cfg.propName;
+  document.title=cfg.propName+' Dashboard';
+  applyTheme();
+}
+
+document.getElementById('monthLabel').textContent=now.toLocaleString('default',{month:'long',year:'numeric'});
+
+async function api(path,method='GET',body=null){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000); // 10 second timeout
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/'+path,{
+      method,
+      signal:controller.signal,
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''},
+      body:body?JSON.stringify(body):null
+    });
+    clearTimeout(timeout);
+    if(!r.ok){
+      const errText=await r.text();
+      throw new Error(`${r.status}: ${errText}`);
+    }
+    const t=await r.text();
+    return t?JSON.parse(t):[];
+  }catch(e){
+    clearTimeout(timeout);
+    if(e.name==='AbortError') throw new Error('Connection timed out — check internet or restore Supabase');
+    throw e;
+  }
+}
+
+const seedData=[
+  {id:1,tenant:'Arun',phone:'8892825143',lease_start:'',lease_end:'',advance:20000,notes:'',rent:9000,status:'late',water_cost:0,opening_arrears:10400},
+  {id:2,tenant:'Meena',phone:'9538096182',lease_start:'',lease_end:'',advance:0,notes:'',rent:9000,status:'late',water_cost:0,opening_arrears:0},
+  {id:3,tenant:'Swetha',phone:'6362936242',lease_start:'',lease_end:'',advance:0,notes:'',rent:9000,status:'late',water_cost:0,opening_arrears:0},
+  {id:4,tenant:'Pooja',phone:'8861028821',lease_start:'',lease_end:'',advance:0,notes:'',rent:9000,status:'late',water_cost:0,opening_arrears:9200},
+  {id:5,tenant:'',phone:'',lease_start:'',lease_end:'',advance:0,notes:'',rent:9000,status:'vacant',water_cost:0,opening_arrears:0},
+  {id:6,tenant:'Damodar',phone:'9550328595',lease_start:'',lease_end:'',advance:20000,notes:'Vacating',rent:9000,status:'vacating',water_cost:0,opening_arrears:820},
+  {id:7,tenant:'Venkatesh',phone:'9916104963',lease_start:'2024-06-01',lease_end:'',advance:25000,notes:'',rent:9000,status:'late',water_cost:0,opening_arrears:10500},
+  {id:8,tenant:'Ravi Kumar',phone:'7678362012',lease_start:'2025-04-07',lease_end:'',advance:25000,notes:'',rent:8000,status:'late',water_cost:0,opening_arrears:0},
+  {id:9,tenant:'Aravid',phone:'9659170607',lease_start:'',lease_end:'',advance:0,notes:'',rent:9000,status:'late',water_cost:0,opening_arrears:17857},
+  {id:10,tenant:'Sujith',phone:'9902413340',lease_start:'2025-05-25',lease_end:'',advance:20000,notes:'Water bill pending',rent:8000,status:'late',water_cost:0,opening_arrears:7000},
+  {id:11,tenant:'Prem',phone:'8123133382',lease_start:'2023-07-06',lease_end:'',advance:20000,notes:'',rent:9000,status:'paid',water_cost:0,opening_arrears:0},
+  {id:12,tenant:'Yashwath',phone:'6363957484',lease_start:'',lease_end:'',advance:0,notes:'',rent:9000,status:'paid',water_cost:0,opening_arrears:0},
+  {id:13,tenant:'Lakshman',phone:'7406389277',lease_start:'2025-10-24',lease_end:'',advance:20000,notes:'',rent:8000,status:'paid',water_cost:0,opening_arrears:0},
+  {id:14,tenant:'Shivraj',phone:'8880084307',lease_start:'2025-09-25',lease_end:'',advance:20000,notes:'',rent:8000,status:'paid',water_cost:0,opening_arrears:0},
+  {id:15,tenant:'Bindu',phone:'8310733305',lease_start:'2025-10-12',lease_end:'',advance:20000,notes:'',rent:8000,status:'late',water_cost:0,opening_arrears:3880},
+  {id:16,tenant:'Anjali',phone:'9076219345',lease_start:'2025-11-02',lease_end:'',advance:20000,notes:'',rent:8000,status:'paid',water_cost:0,opening_arrears:0},
+];
+
+let units=[],histories={},selId=null,curTab='all';
+
+// ── AUTO STATUS LOGIC ──
+// Status is derived each time from payment history:
+// - Has paid payment this month → 'paid'
+// - Has partial payment this month → 'partial'
+// - Past due date, no payment this month → 'late'
+// - Before due date, no payment this month → 'pending'
+// - Manual overrides: 'vacant', 'vacating' are stored and respected
+
+function derivedStatus(u){
+  // Manual statuses always respected
+  if(u.status==='vacant'||u.status==='vacating') return u.status;
+  const monthPays=(histories[u.id]||[]).filter(h=>h.month===thisMonth&&h.type!=='bill'&&h.type!=='water'&&(h.type==='payment'||!h.type));
+  const totalPaidAmt=monthPays.reduce((s,h)=>s+(h.amt_paid||0),0);
+  const water=thisMonthWater(u.id)||u.water_cost||cfg.waterRate;
+  const monthlyBill=u.rent+water;
+  if(totalPaidAmt>=monthlyBill) return 'paid';
+  if(totalPaidAmt>0) return 'partial';
+  // No payment this month
+  if(todayDay>cfg.dueDate) return 'late';
+  return 'pending';
+}
+
+function openingArrears(id){
+  const u=units.find(x=>x.id===id);
+  return u?.opening_arrears||0;
+}
+
+function histArrears(id){
+  // Sum of all unpaid/partial payment records only
+  // Only count PAST months as arrears, not current month
+  return (histories[id]||[]).filter(h=>(h.type==='payment'||!h.type)&&(h.status==='unpaid'||h.status==='partial')&&h.month<thisMonth).reduce((s,h)=>{
+    return s+(h.rent+(h.water||0)-(h.amt_paid||0));
+  },0);
+}
+
+function totalArrears(id){
+  // Both opening arrears AND history arrears combined
+  return openingArrears(id) + histArrears(id);
+}
+
+function thisMonthWater(id){
+  const w=(histories[id]||[]).find(h=>h.month===thisMonth&&h.type==='water');
+  return w?w.water:null;
+}
+
+function ss(state,txt){const e=document.getElementById('syncStatus');e.className='sync '+state;e.textContent=txt;}
+
+// ── AUTO BILL: ensure each unit has a rent bill record for this month ──
+async function ensureMonthlyBills(){
+  for(const u of units){
+    if(u.status==='vacant') continue;
+    const existing=(histories[u.id]||[]).find(h=>h.month===thisMonth&&h.type==='bill');
+    if(!existing){
+      const rec={unit_id:u.id,month:thisMonth,status:'pending',amt_paid:0,method:'',ref:'Auto bill',rent:u.rent,water:0,type:'bill'};
+      try{
+        const saved=await api('payments','POST',rec);
+        const newRec2=saved&&saved[0]?{...saved[0]}:{...rec};
+        if(!histories[u.id]) histories[u.id]=[];
+        histories[u.id].push(newRec2);
+      }catch(e){}
+    }
+  }
+}
+
+async function autoClosePastMonths(){
+  const currentMonth=thisMonth;
+  const toCreate=[];
+  for(const u of units){
+    if(u.status==='vacant') continue;
+    const unitHist=histories[u.id]||[];
+    const oldBills=unitHist.filter(h=>h.type==='bill'&&h.month<currentMonth);
+    for(const bill of oldBills){
+      const hasPayment=unitHist.find(h=>(h.type==='payment'||!h.type)&&h.month===bill.month);
+      if(!hasPayment){
+        const water=unitHist.find(h=>h.type==='water'&&h.month===bill.month);
+        const waterAmt=water?water.water:(u.water_cost||cfg.waterRate);
+        toCreate.push({unit_id:u.id,month:bill.month,status:'unpaid',amt_paid:0,method:'',ref:'Auto — not paid',rent:u.rent,water:waterAmt,type:'payment'});
+      }
+    }
+  }
+  for(const rec of toCreate){
+    try{
+      const existing=await api(`payments?unit_id=eq.${rec.unit_id}&month=eq.${rec.month}&type=eq.payment&select=id`).catch(()=>[]);
+      if(!existing||!existing.length){
+        const saved=await api('payments','POST',rec);
+        const newRec=saved&&saved[0]?{...saved[0]}:{...rec};
+        if(!histories[rec.unit_id]) histories[rec.unit_id]=[];
+        histories[rec.unit_id].push(newRec);
+      }
+    }catch(e){}
+  }
+}
+
+async function testConnection(){
+  showToast('Testing connection...','');
+  try{
+    const res = await fetch(SB_URL+'/rest/v1/units?limit=1',{
+      headers:{
+        'apikey':SB_KEY,
+        'Authorization':'Bearer '+SB_KEY
+      }
+    });
+    const text = await res.text();
+    if(res.ok){
+      showToast('Connected! Status: '+res.status+' Data: '+text.substring(0,40),'');
+      ss('','✓ Connected');
+    } else {
+      showToast('Error '+res.status+': '+text.substring(0,80),'error');
+      ss('error','Error '+res.status);
+    }
+  }catch(e){
+    showToast('Fetch failed: '+e.message,'error');
+    ss('error','Fetch failed');
+  }
+}
+
+async function load(){
+  try{
+    ss('syncing','Connecting...');
+    let u=await api('units?order=id');
+    if(!u||!u.length){
+      ss('syncing','Setting up...');
+      for(const x of seedData) await api('units','POST',x);
+      u=await api('units?order=id');
+    } else {
+      // Patch opening_arrears if missing
+      for(const x of seedData){
+        const existing=u.find(r=>r.id===x.id);
+        if(existing&&(existing.opening_arrears===null||existing.opening_arrears===undefined)){
+          await api(`units?id=eq.${x.id}`,'PATCH',{opening_arrears:x.opening_arrears||0});
+        }
+      }
+      u=await api('units?order=id');
+    }
+    units=u;
+    const pays=await api('payments?order=month');
+    histories={};
+    for(const p of pays){if(!histories[p.unit_id])histories[p.unit_id]=[];histories[p.unit_id].push(p);}
+    await ensureMonthlyBills();
+    await autoClosePastMonths();
+    ss('','✓ Synced');
+    renderAll();
+    showAlert();
+  }catch(e){
+    console.error('Connection error:',e);
+    const msg=e.message||'Unknown error';
+    let friendly='Offline';
+    if(msg.includes('timed out')) friendly='Timed out — check internet';
+    else if(msg.includes('401')||msg.includes('403')) friendly='Auth error — check API key';
+    else if(msg.includes('404')) friendly='Table not found';
+    else if(msg.includes('Failed to fetch')||msg.includes('NetworkError')) friendly='No internet';
+    ss('error',friendly);
+    showToast(friendly+': '+msg.substring(0,60),'error');
+    units=JSON.parse(localStorage.getItem('u_v3')||'null')||seedData;
+    histories=JSON.parse(localStorage.getItem('h_v3')||'null')||{};
+    renderAll();
+  }
+}
+
+async function patchUnit(u, silent=false){
+  try{
+    await api(`units?id=eq.${u.id}`,'PATCH',u);
+    ss('','✓ Synced');
+    if(!silent) showToast('Saved successfully');
+  }catch(e){
+    ss('error','Save failed');
+    if(!silent) showToast('Save failed — check connection','error');
+  }
+}
+async function upsertPay(p){
+  try{
+    let res;
+    if(p.id){await api(`payments?id=eq.${p.id}`,'PATCH',p);res=p;}
+    else{const r=await api('payments','POST',p);res=r&&r[0]?r[0]:p;}
+    ss('','✓ Synced');return res;
+  }catch(e){ss('error','Save failed');showToast('Save failed — check connection','error');return p;}
+}
+async function delPay(id){
+  try{await api(`payments?id=eq.${id}`,'DELETE');ss('','✓ Synced');showToast('Record deleted');}
+  catch(e){ss('error','Delete failed');showToast('Delete failed','error');}
+}
+
+// ── ALERT BANNER ──
+function showAlert(){
+  const occ=units.filter(u=>u.status!=='vacant');
+  const late=occ.filter(u=>derivedStatus(u)==='late');
+  const pending=occ.filter(u=>derivedStatus(u)==='pending');
+  const banner=document.getElementById('alertBanner');
+  if(late.length>0){
+    banner.className='alert-banner late';
+    banner.style.display='block';
+    const mn2=now.toLocaleString('default',{month:'long'});
+    banner.textContent=`⚠️ ${late.length} unit${late.length>1?'s are':' is'} overdue for ${mn2} — past the ${cfg.dueDate}th`;
+  } else if(pending.length>0&&todayDay<=cfg.dueDate){
+    banner.className='alert-banner due';
+    banner.style.display='block';
+    const mn3=now.toLocaleString('default',{month:'long'});
+    banner.textContent=`📅 ${pending.length} unit${pending.length>1?'s have':' has'} not paid yet for ${mn3} — due by the ${cfg.dueDate}th`;
+  } else {
+    banner.style.display='none';
+  }
+}
+
+// ── SETTINGS ──
+function openSettings(){
+  document.getElementById('sPropName').value=cfg.propName;
+  document.getElementById('sWaterRate').value=cfg.waterRate;
+  document.getElementById('sDueDate').value=cfg.dueDate;
+  document.getElementById('sEmail').value=cfg.email;
+  document.getElementById('tLight').classList.toggle('active',cfg.theme==='light');
+  document.getElementById('tDark').classList.toggle('active',cfg.theme==='dark');
+  document.getElementById('settingsModal').classList.add('vis');
+}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('vis');}
+function closeSettingsOutside(e){if(e.target===document.getElementById('settingsModal'))closeSettings();}
+function saveSettings(){
+  const name=document.getElementById('sPropName').value.trim();
+  const rate=parseFloat(document.getElementById('sWaterRate').value);
+  const due=parseInt(document.getElementById('sDueDate').value);
+  const email=document.getElementById('sEmail').value.trim();
+  if(name) cfg.propName=name;
+  if(rate>0) cfg.waterRate=rate;
+  if(due>0&&due<=28) cfg.dueDate=due;
+  if(email) cfg.email=email;
+  localStorage.setItem('cfg_propName',cfg.propName);
+  localStorage.setItem('cfg_waterRate',cfg.waterRate);
+  localStorage.setItem('cfg_theme',cfg.theme);
+  localStorage.setItem('cfg_dueDate',cfg.dueDate);
+  localStorage.setItem('cfg_email',cfg.email);
+  applyConfig();
+  closeSettings();
+  renderAll();
+  showAlert();
+  showToast('Settings saved');
+}
+
+// ── RENDER ──
+function renderMetrics(){
+  const occ=units.filter(u=>u.status!=='vacant');
+  const tR=occ.reduce((s,u)=>s+u.rent,0);
+  // Collected = sum of actual amounts paid this month
+  const col=occ.reduce((s,u)=>{
+    const pays=(histories[u.id]||[]).filter(h=>h.month===thisMonth&&(h.type==='payment'||!h.type));
+    const totalPaid=pays.reduce((a,h)=>a+(h.amt_paid||0),0);
+    const water=thisMonthWater(u.id)||u.water_cost||cfg.waterRate;
+    const bill=u.rent+water;
+    return s+Math.min(totalPaid,bill);
+  },0);
+  const lateN=occ.filter(u=>['late','pending'].includes(derivedStatus(u))).length;
+  const arr=occ.reduce((s,u)=>s+totalArrears(u.id),0);
+  document.getElementById('metricsWrap').innerHTML=`
+    <div class="metrics">
+      <div class="mc"><div class="mc-label">Monthly Rent</div><div class="mc-val b">₹${(tR/1000).toFixed(0)}k</div></div>
+      <div class="mc"><div class="mc-label">${now.toLocaleString('default',{month:'short'})}</div><div class="mc-val g">₹${(col/1000).toFixed(0)}k</div></div>
+      <div class="mc"><div class="mc-label">Unpaid</div><div class="mc-val r">${lateN} units</div></div>
+      <div class="mc"><div class="mc-label">Arrears</div><div class="mc-val a">₹${arr>=1000?(arr/1000).toFixed(1)+'k':arr}</div></div>
+    </div>`;
+}
+
+function statusLabel(s){
+  return{paid:'Paid',late:'Late',pending:'Pending',partial:'Partial',vacant:'Vacant',vacating:'Vacating'}[s]||s;
+}
+
+function renderGrid(){
+  document.getElementById('tAll').innerHTML=`<div class="unit-grid">${units.map(u=>{
+    const st=derivedStatus(u);
+    const ta=totalArrears(u.id);
+    return`<div class="ucard ${st}${selId===u.id?' sel':''}" onclick="openUnit(${u.id})">
+      <div class="unum">Unit ${u.id}</div>
+      <div class="utenant">${u.tenant||'Vacant'}</div>
+      <div class="urent">₹${u.rent.toLocaleString()}/mo</div>
+      <span class="ubadge b-${st}">${statusLabel(st)}</span>
+      ${ta>0?`<div class="arrears-pill">₹${ta.toLocaleString()} arrears</div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderArrears(){
+  const el=document.getElementById('tArrears');
+  const prob=units.filter(u=>{
+    const st=derivedStatus(u);
+    return u.status!=='vacant'&&(st==='late'||st==='pending'||st==='partial'||totalArrears(u.id)>0);
+  });
+  if(!prob.length){el.innerHTML='<div class="empty-state"><div>🎉</div>All tenants are up to date!</div>';return;}
+  el.innerHTML=prob.map(u=>{
+    const st=derivedStatus(u);
+    const ta=totalArrears(u.id);
+    const water=thisMonthWater(u.id)||u.water_cost||cfg.waterRate;
+    const curOwed=st!=='paid'?u.rent+water:0;
+    return`<div class="arr-item ${st==='pending'?'pending-item':''}">
+      <div class="arr-name">Unit ${u.id} — ${u.tenant} <span style="font-size:11px;font-weight:400;color:var(--text3)">(${statusLabel(st)})</span></div>
+      <div class="arr-detail">
+        ${u.phone?`📞 <a class="arr-phone" href="tel:${u.phone}">${u.phone}</a><br>`:''}
+        Rent ₹${u.rent.toLocaleString()} · Water ₹${water}
+        ${u.notes?`<br><em>${u.notes}</em>`:''}
+      </div>
+      <div class="arr-footer">
+        <div>
+          ${ta>0?`<span class="arr-badge">₹${ta.toLocaleString()} arrears</span>`:''} 
+          ${st==='pending'?`<span class="arr-badge pending">${now.toLocaleString('default',{month:'long'})} due by ${cfg.dueDate}th</span>`:''}
+        </div>
+        <div style="text-align:right">
+          ${curOwed>0?`<div class="arr-total">₹${curOwed.toLocaleString()}</div><div class="arr-sub">${now.toLocaleString('default',{month:'long'})}</div>`:''}
+          ${ta>0?`<div style="font-size:12px;font-weight:700;color:var(--red);margin-top:5px">Total: ₹${(curOwed+ta).toLocaleString()}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderWater(){
+  const el=document.getElementById('tWater');
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <p style="font-size:12px;color:var(--text3)">Default: <strong style="color:var(--text)">₹${cfg.waterRate}/month</strong></p>
+      <button class="btn" onclick="openSettings()" style="font-size:12px;padding:6px 12px">Change Default ⚙️</button>
+    </div>`+
+  units.filter(u=>u.status!=='vacant').map(u=>{
+    const saved=thisMonthWater(u.id);
+    const hasSaved=saved!==null;
+    return`<div class="water-item">
+      <div class="water-name">
+        <span>Unit ${u.id} — ${u.tenant}</span>
+        ${hasSaved?`<span style="font-size:11px;font-weight:600;color:var(--green)">✓ Saved</span>`:`<span style="font-size:11px;color:var(--amber)">Not set</span>`}
+      </div>
+      <div class="water-cost-row">
+        <label>Water charge (₹):</label>
+        <input class="water-cost-input" type="number" id="wc${u.id}" value="${hasSaved?saved:(u.water_cost||cfg.waterRate)}" placeholder="${cfg.waterRate}">
+        <button class="water-save-btn" onclick="saveWaterCost(${u.id})">Save</button>
+      </div>
+      <div class="wbill ${hasSaved?'':'pending-water'}" id="wb${u.id}">
+        <span class="wbill-label">${hasSaved?'This month':'Estimated'}</span>
+        <span class="wbill-amt">₹${(hasSaved?saved:(u.water_cost||cfg.waterRate)).toLocaleString()}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveWaterCost(id){
+  const u=units.find(x=>x.id===id);
+  const val=parseFloat(document.getElementById('wc'+id).value)||cfg.waterRate;
+  // Save as a water type record for this month
+  const existing=(histories[id]||[]).find(h=>h.month===thisMonth&&h.type==='water');
+  const rec={unit_id:id,month:thisMonth,status:'paid',amt_paid:0,method:'',ref:'Water charge',rent:0,water:val,type:'water'};
+  if(existing) rec.id=existing.id;
+  ss('syncing','Saving...');
+  const saved=await upsertPay(rec);
+  if(existing){histories[id]=(histories[id]||[]).map(h=>(h.month===thisMonth&&h.type==='water')?saved:h);}
+  else{if(!histories[id])histories[id]=[];histories[id].push(saved);}
+  // Also update unit water_cost silently
+  u.water_cost=val;
+  await patchUnit(u, true);
+  renderWater();
+  renderMetrics();
+  if(selId===id) refreshBill();
+}
+
+function switchTab(tab,el){
+  curTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tAll').style.display=tab==='all'?'':'none';
+  document.getElementById('tArrears').style.display=tab==='arrears'?'':'none';
+  document.getElementById('tWater').style.display=tab==='water'?'':'none';
+  if(tab==='arrears') renderArrears();
+  if(tab==='water') renderWater();
+}
+
+function sPTab(tab,el){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.ptab-content').forEach(t=>t.classList.remove('vis'));
+  document.getElementById('pt-'+tab).classList.add('vis');
+  if(tab==='history') renderHist(selId);
+  if(tab==='billing') refreshBill();
+}
+
+function openUnit(id){
+  selId=id;
+  const u=units.find(x=>x.id===id);
+  const st=derivedStatus(u);
+  document.getElementById('pTitle').textContent=`Unit ${u.id} — ${u.tenant||'Vacant'}`;
+  document.getElementById('infoF').innerHTML=`
+    <div class="field"><label>Tenant Name</label><input id="fTenant" value="${u.tenant||''}"></div>
+    <div class="field"><label>Phone</label><input id="fPhone" type="tel" value="${u.phone||''}"></div>
+    <div class="field"><label>Lease Start</label><input id="fLs" type="date" value="${u.lease_start||''}"></div>
+    <div class="field"><label>Lease End</label><input id="fLe" type="date" value="${u.lease_end||''}"></div>
+    <div class="field"><label>Advance Paid (₹)</label><input id="fAdv" type="number" value="${u.advance||0}"></div>
+    <div class="field"><label>Unit Status</label>
+      <select id="fStatus">
+        <option value="active" ${u.status==='active'||(!['vacant','vacating'].includes(u.status))?'selected':''}>Active (auto)</option>
+        <option value="vacating" ${u.status==='vacating'?'selected':''}>Vacating</option>
+        <option value="vacant" ${u.status==='vacant'?'selected':''}>Vacant</option>
+      </select>
+    </div>
+    <div class="field"><label>Monthly Rent (₹)</label><input id="fRent" type="number" value="${u.rent}"></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes">${u.notes||''}</textarea></div>
+  `;
+  const waterVal=thisMonthWater(id)||u.water_cost||cfg.waterRate;
+  document.getElementById('fWater').value=waterVal;
+  sPTab('info',document.querySelector('.ptab'));
+  refreshBill(u);
+  document.getElementById('panel').classList.add('vis');
+  renderGrid();
+  setTimeout(()=>document.getElementById('panel').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function refreshBill(u){
+  u=u||units.find(x=>x.id===selId);
+  if(!u) return;
+  const st=derivedStatus(u);
+  const water=parseFloat(document.getElementById('fWater')?.value)||thisMonthWater(u.id)||u.water_cost||cfg.waterRate;
+  const rent=u.rent;
+  const total=rent+water;
+  const ta=totalArrears(u.id);
+
+  // Sum all payments made this month
+  const monthPayments=(histories[u.id]||[]).filter(h=>h.month===thisMonth&&(h.type==='payment'||!h.type));
+  const totalPaidThisMonth=monthPayments.reduce((s,h)=>s+(h.amt_paid||0),0);
+  const remaining=Math.max(0,total-totalPaidThisMonth);
+  const grandRemaining=Math.max(0,total+ta-totalPaidThisMonth);
+
+  const mn=now.toLocaleString('default',{month:'long'});
+  const mnFull=now.toLocaleString('default',{month:'long',year:'numeric'});
+
+  document.getElementById('billBox').innerHTML=`
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">${mnFull} Bill</div>
+    <div class="bill-row"><span>Rent</span><span>₹${rent.toLocaleString()}</span></div>
+    <div class="bill-row"><span>Water</span><span>₹${water.toLocaleString()}</span></div>
+    <div class="bill-row grand"><span>Total for ${mn}</span><span>₹${total.toLocaleString()}</span></div>
+    ${ta>0?`<div class="bill-row arrears"><span>Previous Arrears</span><span>₹${ta.toLocaleString()}</span></div>
+    <div class="bill-row arrears"><span>Grand Total Owed</span><span>₹${(total+ta).toLocaleString()}</span></div>`:''}
+    ${totalPaidThisMonth>0?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <div class="bill-row" style="color:var(--green)"><span>Paid (${monthPayments.length} payment${monthPayments.length>1?'s':''})</span><span>₹${totalPaidThisMonth.toLocaleString()}</span></div>
+      ${grandRemaining>0?`<div class="bill-row" style="color:var(--red);font-weight:600"><span>Balance remaining</span><span>₹${grandRemaining.toLocaleString()}</span></div>`:''}
+    </div>`:''}
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <span class="ubadge b-${st}">${statusLabel(st)}</span>
+      ${st==='late'?`<span style="font-size:11px;color:var(--red);margin-left:6px">Overdue for ${mn} — past ${cfg.dueDate}th</span>`:''}
+      ${st==='pending'?`<span style="font-size:11px;color:var(--amber);margin-left:6px">${mn} rent due by ${cfg.dueDate}th</span>`:''}
+      ${st==='paid'?`<span style="font-size:11px;color:var(--green);margin-left:6px">Fully paid for ${mn} ✓</span>`:''}
+    </div>
+  `;
+
+  // Show/hide quick pay form
+  const qpBox=document.getElementById('quickPayBox');
+  if(st!=='paid'&&st!=='vacant'&&st!=='vacating'){
+    qpBox.style.display='block';
+    const monthPays2=(histories[u.id]||[]).filter(h=>h.month===thisMonth&&(h.type==='payment'||!h.type));
+    const alreadyPaid=monthPays2.reduce((s,h)=>s+(h.amt_paid||0),0);
+    const grandTotal=total+ta;
+    const stillOwed=Math.max(0,grandTotal-alreadyPaid);
+    document.getElementById('qAmt').value=stillOwed;
+    const amtLabel=document.getElementById('qAmtLabel');
+    if(amtLabel){
+      const mn=now.toLocaleString('default',{month:'long'});
+      let lbl='Amount Received (₹)';
+      if(alreadyPaid>0) lbl+=`<br><span style="font-size:11px;color:var(--green);font-weight:400">Already paid: ₹${alreadyPaid.toLocaleString()} · Still owed: ₹${stillOwed.toLocaleString()}</span>`;
+      else if(ta>0) lbl+=`<br><span style="font-size:11px;color:var(--text3);font-weight:400">${mn} ₹${total.toLocaleString()} + arrears ₹${ta.toLocaleString()} = ₹${grandTotal.toLocaleString()}</span>`;
+      amtLabel.innerHTML=lbl;
+    }
+  } else {
+    qpBox.style.display='none';
+  }
+}
+
+async function recordPayment(){
+  const u=units.find(x=>x.id===selId);
+  const amt=parseInt(document.getElementById('qAmt').value)||0;
+  const method=document.getElementById('qMethod').value;
+  const ref=document.getElementById('qRef').value;
+  const water=parseFloat(document.getElementById('fWater')?.value)||thisMonthWater(u.id)||u.water_cost||cfg.waterRate;
+  const total=u.rent+water;
+  const ta=totalArrears(u.id);
+  const grandTotal=total+ta;
+  // Determine status based on how much they paid vs this month's bill
+  const status=amt>=total?'paid':amt>0?'partial':'unpaid';
+  // If they paid more than this month's bill, the extra goes toward opening_arrears
+  if(amt>total&&u.opening_arrears>0){
+    const extra=amt-total;
+    u.opening_arrears=Math.max(0, u.opening_arrears-extra);
+    await patchUnit(u, true); // silent — main toast comes from upsertPay
+  }
+  // If they paid more than this month and there are hist arrears,
+  // mark oldest unpaid month as partially settled
+  const rec={unit_id:selId,month:thisMonth,status,amt_paid:amt,method,ref,rent:u.rent,water,type:'payment'};
+  ss('syncing','Saving...');
+  const saved=await upsertPay(rec);
+  if(!histories[selId]) histories[selId]=[];
+  // Remove any existing payment for this month
+  // Add new payment — don't overwrite, accumulate
+  if(!histories[selId]) histories[selId]=[];
+  histories[selId].push(saved);
+  document.getElementById('qAmt').value='';
+  document.getElementById('qRef').value='';
+  showToast('Payment recorded ✓');
+  renderAll();
+  refreshBill(u);
+  showAlert();
+}
+
+async function saveWaterOnly(){
+  await saveWaterCost(selId);
+  showToast('Water charge saved ✓');
+  refreshBill();
+}
+
+function renderHist(id){
+  const hist=(histories[id]||[]).filter(h=>h.type!=='bill'&&h.type!=='water'&&(h.type==='payment'||!h.type)).slice().reverse();
+  const el=document.getElementById('histList');
+  if(!hist.length){el.innerHTML='<div class="empty-state"><div>📭</div>No records yet.</div>';return;}
+  el.innerHTML=hist.map(h=>{
+    const [yr,mo]=h.month.split('-');
+    const lbl=`${MONTHS[parseInt(mo)-1]} ${yr}`;
+    const mc=h.method==='upi'?'m-upi':h.method==='bank'?'m-bank':'m-cash';
+    const amtColor=h.status==='paid'?'var(--green)':h.status==='partial'?'var(--amber)':'var(--red)';
+    const [hyr,hmo]=h.month.split('-');
+    const histMonthName=MONTHS[parseInt(hmo)-1]+' '+hyr;
+    const isWater=h.type==='water';
+    return`<div class="pay-item ${isWater?'bill':h.status}">
+      <div class="pay-top">
+        <span class="pay-month">${lbl} ${isWater?'· Water':''}</span>
+        <div style="display:flex;align-items:center;gap:7px">
+          <span class="pay-amt" style="color:${isWater?'var(--blue)':amtColor}">
+            ${isWater?`₹${h.water} water`:`₹${(h.amt_paid||0).toLocaleString()}`}
+          </span>
+          <button class="delbtn" onclick="doDel(${h.id})">Delete</button>
+        </div>
+      </div>
+      <div class="pay-meta">
+        ${!isWater&&h.method?`<span class="method-badge ${mc}">${h.method==='upi'?'UPI':h.method==='bank'?'Bank Transfer':'Cash'}</span>`:''}
+        ${h.ref?`<span class="pay-ref">${h.ref}</span>`:''}
+        ${!isWater?`<span style="font-size:11px;color:var(--text3);text-transform:capitalize">${h.status}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function doDel(pid){
+  if(!confirm('Delete this record?')) return;
+  ss('syncing','Deleting...');
+  await delPay(pid);
+  histories[selId]=(histories[selId]||[]).filter(h=>h.id!==pid);
+  renderHist(selId);renderAll();showAlert();
+}
+
+async function addManualHist(){
+  const month=document.getElementById('nMonth').value;
+  const status=document.getElementById('nStatus').value;
+  const amt_paid=parseInt(document.getElementById('nAmt').value)||0;
+  const method=document.getElementById('nMethod').value;
+  const ref=document.getElementById('nRef').value;
+  if(!month||!selId) return;
+  const u=units.find(x=>x.id===selId);
+  const existing=(histories[selId]||[]).find(h=>h.month===month&&h.type==='payment');
+  const rec={unit_id:selId,month,status,amt_paid,method,ref,water:u.water_cost||cfg.waterRate,rent:u.rent,type:'payment'};
+  if(existing) rec.id=existing.id;
+  ss('syncing','Saving...');
+  const saved=await upsertPay(rec);
+  if(existing){histories[selId]=(histories[selId]||[]).map(h=>(h.month===month&&h.type==='payment')?saved:h);}
+  else{if(!histories[selId])histories[selId]=[];histories[selId].push(saved);histories[selId].sort((a,b)=>a.month.localeCompare(b.month));}
+  document.getElementById('nAmt').value='';
+  document.getElementById('nRef').value='';
+  showToast('Record added ✓');
+  renderHist(selId);renderAll();showAlert();
+}
+
+async function doSave(){
+  const u=units.find(x=>x.id===selId);
+  const g=id=>{const el=document.getElementById(id);return el?el.value:null;};
+  if(g('fTenant')!==null) u.tenant=g('fTenant');
+  if(g('fPhone')!==null) u.phone=g('fPhone');
+  if(g('fLs')!==null) u.lease_start=g('fLs');
+  if(g('fLe')!==null) u.lease_end=g('fLe');
+  if(g('fAdv')!==null) u.advance=parseInt(g('fAdv'))||0;
+  if(g('fNotes')!==null) u.notes=g('fNotes');
+  if(g('fStatus')!==null) u.status=g('fStatus')==='active'?'active':g('fStatus');
+  if(g('fRent')!==null) u.rent=parseInt(g('fRent'))||u.rent;
+  ss('syncing','Saving...');
+  await patchUnit(u);
+  renderAll();showAlert();
+  document.getElementById('pTitle').textContent=`Unit ${u.id} — ${u.tenant||'Vacant'}`;
+  refreshBill(u);
+}
+
+function closePanel(){selId=null;document.getElementById('panel').classList.remove('vis');renderGrid();}
+function renderAll(){renderMetrics();renderGrid();if(curTab==='arrears')renderArrears();if(curTab==='water')renderWater();}
+
+// showToast defined at top of script
+
+// Refresh
+async function refreshApp(){
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';}
+  ss('syncing','Refreshing...');
+  try{
+    const u=await api('units?order=id');
+    units=u;
+    const pays=await api('payments?order=month');
+    histories={};
+    for(const p of pays){if(!histories[p.unit_id])histories[p.unit_id]=[];histories[p.unit_id].push(p);}
+    await ensureMonthlyBills();
+    await autoClosePastMonths();
+    ss('','✓ Synced');
+    renderAll();
+    showAlert();
+    showToast('Dashboard refreshed');
+  }catch(e){
+    ss('error','Refresh failed');
+    showToast('Refresh failed','error');
+  }
+  if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
+}
+
+// ── REPORT GENERATION ──
+function generateReportData(){
+  const month=now.toLocaleString('default',{month:'long',year:'numeric'});
+  const rows=[];
+  // Header
+  rows.push([cfg.propName + ' — Monthly Report — ' + month]);
+  rows.push([]);
+  rows.push(['Unit','Tenant','Phone','Rent','Water','Total Bill','Paid','Balance','Status','Arrears','Notes']);
+
+  let totalRent=0,totalWater=0,totalBill=0,totalPaid=0,sumArrears=0;
+
+  for(const u of units){
+    if(u.status==='vacant'){
+      rows.push([u.id,'VACANT','','','','','','','Vacant','','']);
+      continue;
+    }
+    const st=derivedStatus(u);
+    // Use actual saved water charge for this month, then unit override, then default
+    const savedWater=thisMonthWater(u.id);
+    const water=savedWater!==null?savedWater:(u.water_cost&&u.water_cost>0?u.water_cost:cfg.waterRate);
+    const bill=u.rent+water;
+    const pay=(histories[u.id]||[]).find(h=>h.month===thisMonth&&(h.type==='payment'||!h.type)&&(h.status==='paid'||h.status==='partial'));
+    const paid=pay?pay.amt_paid:0;
+    const balance=Math.max(0,bill-paid);
+    const arr=totalArrears(u.id);
+    totalRent+=u.rent;totalWater+=water;totalBill+=bill;totalPaid+=paid;sumArrears+=arr;
+    rows.push([
+      u.id,u.tenant,u.phone,
+      u.rent,water,bill,
+      paid,balance,
+      statusLabel(st),
+      arr>0?arr:'',
+      u.notes||''
+    ]);
+  }
+
+  rows.push([]);
+  rows.push(['TOTALS','','',totalRent,totalWater,totalBill,totalPaid,totalBill-totalPaid,'',sumArrears,'']);
+  rows.push([]);
+
+  // Arrears detail sheet data
+  const arrRows=[];
+  arrRows.push(['Unit','Tenant','Month','Rent Due','Water Due','Paid','Balance','Ref/UTR']);
+  for(const u of units){
+    if(u.status==='vacant') continue;
+    const unpaid=(histories[u.id]||[]).filter(h=>(h.type==='payment'||!h.type)&&(h.status==='unpaid'||h.status==='partial')&&h.month<thisMonth);
+    for(const h of unpaid){
+      const [yr,mo]=h.month.split('-');
+      const lbl=MONTHS[parseInt(mo)-1]+' '+yr;
+      arrRows.push([u.id,u.tenant,lbl,h.rent,h.water||0,h.amt_paid||0,(h.rent+(h.water||0))-(h.amt_paid||0),h.ref||'Auto']);
+    }
+    if(u.opening_arrears>0){
+      arrRows.push([u.id,u.tenant,'Opening Balance',u.opening_arrears,0,0,u.opening_arrears,'Opening balance']);
+    }
+  }
+
+  return {rows, arrRows, month};
+}
+
+// ── PURE JS XLSX GENERATOR (no CDN needed) ──
+function generateXLSX(sheets){
+  // sheets = [{name, rows: [[...],[...]] }]
+  const strings=[];
+  const sst=(v)=>{const s=String(v===null||v===undefined?'':v);let i=strings.indexOf(s);if(i===-1){i=strings.length;strings.push(s);}return i;};
+
+  const colLetter=(n)=>{let s='';n++;while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;};
+
+  const sheetsXml=sheets.map(({name,rows,colWidths})=>{
+    let cells='';
+    let maxCol=0;
+    rows.forEach((row,ri)=>{
+      if(!row||!row.length) return;
+      maxCol=Math.max(maxCol,row.length);
+      let rowCells='';
+      row.forEach((val,ci)=>{
+        const ref=colLetter(ci)+(ri+1);
+        if(val===null||val===undefined||val===''){return;}
+        if(typeof val==='number'){
+          rowCells+=`<c r="${ref}" t="n"><v>${val}</v></c>`;
+        } else {
+          const idx=sst(val);
+          rowCells+=`<c r="${ref}" t="s"><v>${idx}</v></c>`;
+        }
+      });
+      if(rowCells) cells+=`<row r="${ri+1}">${rowCells}</row>`;
+    });
+    const colDefs=colWidths?colWidths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join(''):'';
+    const lastRef=colLetter(maxCol-1)+(rows.length);
+    return {
+      name,
+      xml:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+        `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`+
+        (colDefs?`<cols>${colDefs}</cols>`:'')+
+        `<sheetData>${cells}</sheetData></worksheet>`
+    };
+  });
+
+  const sstXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+    `<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${strings.length}" uniqueCount="${strings.length}">`+
+    strings.map(s=>`<si><t xml:space="preserve">${s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</t></si>`).join('')+
+    `</sst>`;
+
+  const wbXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+    `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" `+
+    `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`+
+    `<sheets>`+sheetsXml.map((s,i)=>`<sheet name="${s.name}" sheetId="${i+1}" r:id="rId${i+2}"/>`).join('')+
+    `</sheets></workbook>`;
+
+  const wbRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+    `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`+
+    `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>`+
+    sheetsXml.map((s,i)=>`<Relationship Id="rId${i+2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+
+    `</Relationships>`;
+
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+    `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">`+
+    `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>`+
+    `<Default Extension="xml" ContentType="application/xml"/>`+
+    `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>`+
+    `<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>`+
+    sheetsXml.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+
+    `</Types>`;
+
+  const rootRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`+
+    `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`+
+    `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>`+
+    `</Relationships>`;
+
+  // Build zip using simple deflate-free store method
+  const files={
+    '[Content_Types].xml': contentTypes,
+    '_rels/.rels': rootRels,
+    'xl/workbook.xml': wbXml,
+    'xl/_rels/workbook.xml.rels': wbRels,
+    'xl/sharedStrings.xml': sstXml,
+  };
+  sheetsXml.forEach((s,i)=>{files[`xl/worksheets/sheet${i+1}.xml`]=s.xml;});
+
+  return buildZip(files);
+}
+
+function strToBytes(str){
+  const enc=new TextEncoder();
+  return enc.encode(str);
+}
+
+function buildZip(files){
+  const entries=[];
+  let offset=0;
+  const allNames=Object.keys(files);
+
+  for(const name of allNames){
+    const data=strToBytes(files[name]);
+    const namBytes=strToBytes(name);
+    const crc=crc32(data);
+    const header=new Uint8Array(30+namBytes.length);
+    const dv=new DataView(header.buffer);
+    dv.setUint32(0,0x04034b50,true); // signature
+    dv.setUint16(4,20,true);         // version
+    dv.setUint16(6,0,true);          // flags
+    dv.setUint16(8,0,true);          // no compression
+    dv.setUint16(10,0,true);         // mod time
+    dv.setUint16(12,0,true);         // mod date
+    dv.setUint32(14,crc,true);
+    dv.setUint32(18,data.length,true);
+    dv.setUint32(22,data.length,true);
+    dv.setUint16(26,namBytes.length,true);
+    dv.setUint16(28,0,true);
+    header.set(namBytes,30);
+    entries.push({name,namBytes,data,header,offset,crc});
+    offset+=header.length+data.length;
+  }
+
+  // Central directory
+  const cdParts=[];
+  for(const e of entries){
+    const cd=new Uint8Array(46+e.namBytes.length);
+    const dv=new DataView(cd.buffer);
+    dv.setUint32(0,0x02014b50,true);
+    dv.setUint16(4,20,true);
+    dv.setUint16(6,20,true);
+    dv.setUint16(8,0,true);
+    dv.setUint16(10,0,true);
+    dv.setUint16(12,0,true);
+    dv.setUint16(14,0,true);
+    dv.setUint32(16,e.crc,true);
+    dv.setUint32(20,e.data.length,true);
+    dv.setUint32(24,e.data.length,true);
+    dv.setUint16(28,e.namBytes.length,true);
+    dv.setUint16(30,0,true);
+    dv.setUint16(32,0,true);
+    dv.setUint16(34,0,true);
+    dv.setUint16(36,0,true);
+    dv.setUint32(38,0,true);
+    dv.setUint32(42,e.offset,true);
+    cd.set(e.namBytes,46);
+    cdParts.push(cd);
+  }
+
+  const cdSize=cdParts.reduce((s,p)=>s+p.length,0);
+  const eocd=new Uint8Array(22);
+  const edv=new DataView(eocd.buffer);
+  edv.setUint32(0,0x06054b50,true);
+  edv.setUint16(4,0,true);
+  edv.setUint16(6,0,true);
+  edv.setUint16(8,entries.length,true);
+  edv.setUint16(10,entries.length,true);
+  edv.setUint32(12,cdSize,true);
+  edv.setUint32(16,offset,true);
+  edv.setUint16(20,0,true);
+
+  const totalSize=offset+cdSize+22;
+  const out=new Uint8Array(totalSize);
+  let pos=0;
+  for(const e of entries){out.set(e.header,pos);pos+=e.header.length;out.set(e.data,pos);pos+=e.data.length;}
+  for(const cd of cdParts){out.set(cd,pos);pos+=cd.length;}
+  out.set(eocd,pos);
+  return out;
+}
+
+function crc32(data){
+  let crc=0xFFFFFFFF;
+  for(let i=0;i<data.length;i++){
+    crc^=data[i];
+    for(let j=0;j<8;j++) crc=(crc&1)?(crc>>>1)^0xEDB88320:(crc>>>1);
+  }
+  return (crc^0xFFFFFFFF)>>>0;
+}
+
+function downloadReport(){
+  try{
+    const {rows,arrRows,month}=generateReportData();
+
+    // Payments sheet
+    const payRows=[['Unit','Tenant','Month','Amount Paid (₹)','Method','UTR / Reference','Status']];
+    for(const u of units){
+      if(u.status==='vacant') continue;
+      const pays=(histories[u.id]||[]).filter(h=>(h.type==='payment'||!h.type)&&h.month===thisMonth);
+      pays.forEach((p,pi)=>{
+        payRows.push([u.id,pi===0?u.tenant:'',pi===0?month:'',p.amt_paid||0,p.method||'',p.ref||'',p.status]);
+      });
+    }
+
+    const sheets=[
+      {name:'Monthly Summary', rows, colWidths:[6,18,14,10,10,12,10,10,10,12,25]},
+      {name:'Arrears Detail', rows:arrRows, colWidths:[6,18,14,12,12,10,12,20]},
+      {name:'Payments '+now.toLocaleString('default',{month:'short'}), rows:payRows, colWidths:[6,18,14,14,12,22,10]},
+    ];
+
+    const xlsxBytes=generateXLSX(sheets);
+    const blob=new Blob([xlsxBytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const filename=cfg.propName.replace(/\s+/g,'_')+'_Report_'+month.replace(/\s+/g,'_')+'.xlsx';
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Report downloaded ✓');
+  }catch(e){
+    console.error('Report error:',e);
+    showToast('Report failed: '+e.message,'error');
+  }
+}
+
+// Init
+applyConfig();
+const nm=document.getElementById('nMonth');
+if(nm) nm.value=thisMonth;
+load();
+</script>
+</body>
+</html>
